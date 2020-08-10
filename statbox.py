@@ -3,9 +3,9 @@ import os, json
 import time
 
 from parser import parse_email
-from insight import email_counts
+from insight import count, CountType
 
-from utils import print_histogram
+from visual import bar_chart
 import server_comm
 
 import pickle
@@ -33,15 +33,29 @@ server_hostname = 'imap.' + email_address.split('@')[1]
 
 print()
 
-server_comm.init(server_hostname=server_hostname, username=username, password=password, port=port)
+server = server_comm.get_server(server_hostname=server_hostname, username=username, password=password, port=port)
 
-messages = None
+fetcher = server_comm.ServerComm(server, verbose=True)
+
 if os.path.exists('messagedump'):
     with open('messagedump', 'rb') as file:
         messages = pickle.load(file)
 else:
-    messages = server_comm.fetch_messages()
     with open('messagedump', 'wb+') as file:
-        pickle.dump(messages, file)
+        fetcher.fetch_all()
+        pickle.dump(fetcher.messages, file)
+        messages = fetcher.messages
 
-print_histogram(email_counts(messages))
+fetcher.delete_message('12')
+
+with open('counts/email_address_counts.txt', 'w+') as file:
+    file.write(bar_chart(count(messages, CountType.EMAIL_ADDRESS)))
+
+with open('counts/tld_counts.txt', 'w+') as file:
+    file.write(bar_chart(count(messages, CountType.TLD)))
+
+with open('counts/hostname_counts.txt', 'w+') as file:
+    file.write(bar_chart(count(messages, CountType.HOSTNAME)))
+
+with open('counts/domain_counts.txt', 'w+') as file:
+    file.write(bar_chart(count(messages, CountType.DOMAIN)))

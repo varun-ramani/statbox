@@ -1,4 +1,6 @@
 creds.json
 venv/
 __pycache__/
+counts/
 messagedump
+*.txt

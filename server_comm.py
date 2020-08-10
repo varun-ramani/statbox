@@ -3,100 +3,62 @@ import time
 from parser import parse_email
 import ssl
 import threading
+import math
+from utils import generate_batches
 
-server = None
-context = None
-
-def init(server_hostname, port, username, password):
-    global server
-    global context
-
+def get_server(server_hostname, port, username, password):
     context = ssl.create_default_context()
-    print(f"Connecting to '{server_hostname}':{port}")
     server = imaplib.IMAP4_SSL(server_hostname, port, ssl_context=context)
     try:
-        print(f"Attempting login to '{server_hostname}'")
         server.login(username, password)
-        print("Login successful!")
-
+        server.select("INBOX")
+        return server
     except:
-        print("Login failed.")
+        print("Connection failed.")
         exit()
 
-class MailFetchThread(threading.Thread):
-    def __init__(self, range, on_fetch, on_finish):
-        self.range = range
+class ServerComm:
+    def __init__(self, server, verbose=False):
+        self.server: imaplib.IMAP4_SSL = server
+        self.verbose = verbose
+
+        self.total_messages = 0
         self.messages = []
-        self.on_fetch = on_fetch
-        self.on_finish = on_finish
+        self.messages_downloaded = 0
 
-    def run(self):
-        for index in self.range:
-            try:
-                status, message = server.fetch(str(index).encode('utf-8'), '(RFC822)')
-                self.messages.append(message)
-                self.on_fetch(index, message)
-            except:
-                print(f"Failed to fetch message #{index}")
+        self.threads = []
 
-        self.on_finish(self.messages)
+    def thread_finished_callback(self, messages):
+        self.messages += messages
 
-class MailFetcher():
-    def __init__(self, server, context):
-        
+    def thread_fetched_callback(self):
+        self.messages_downloaded += 1
+        if self.verbose:
+            print("Fetched {:4}/{:4} emails.".format(self.messages_downloaded, self.total_messages, end="\r"))
 
-def fetch_messages():
-    global server
-    global context
+    def fetch_all(self):
+        self.server.select('inbox')
+        status, indices = self.server.search(None, 'ALL')
 
-    server.select("inbox")
-    status, indices = server.search(None, 'ALL')
+        if status != 'OK':
+            print("Failed to perform initial search. Abort.")
+            exit()
 
-    if status != "OK":
-        print("Failed to perform initial search. Abort.")
-        exit()
+        indices = indices[0].split()
+        if self.verbose:
+            print(f"Found {len(indices)} emails.")
 
-    indices = indices[0].split()
-    print(f"Found {len(indices)} emails.")
-    print("Fetched {:4}/{:4} emails".format(0, len(indices)), end="\r")
+        self.total_messages = len(indices)
 
-    prev_time = time.time()
-    times = [0.1] * (int(len(indices) / 20) + 1)
+        batches = generate_batches(1, len(indices) - 1, 50)
 
-    messages = []
+        for batch in batches:
+            print(f'Downloading emails {batch[0]} through {batch[1]}')
+            status, response = self.server.fetch(f'{batch[0]}:{batch[1]}', '(RFC822)')
+            for item in response:
+                if len(item) == 2:
+                    decoded = item[1].decode('ISO-8859-1')
+                    self.messages.append(parse_email(decoded))
 
-    for index in range(0, len(indices)):
-        try:
-            status, message = server.fetch(indices[index], '(RFC822)')
-        except:
-            print(f"Failed to fetch message #{int(indices[index])}\n\n")
-
-        current_time = time.time()
-        elapsed_time = current_time - prev_time
-        times.pop(0)
-        times.append(elapsed_time)
-        avg_time = sum(times) / len(times)
-        prev_time = current_time
-
-        emails_remaining = len(indices) - index
-
-        seconds_remaining = emails_remaining * avg_time
-        seconds_remaining_str = ""
-
-        if seconds_remaining < 60:
-            seconds_remaining_str = "{:.1f} seconds remaining".format(seconds_remaining)
-
-        elif seconds_remaining < 3600:
-            seconds_remaining_str = "{:.1f} minutes remaining".format(seconds_remaining / 60)
-
-        else:
-            seconds_remaining_str = "{:.1f} hours remaining".format(seconds_remaining / 3600)
-
-        print("Fetched {:4}/{:4} emails. {:20}.".format(index, len(indices), seconds_remaining_str), end="\r")
-
-        try:
-            messages.append(parse_email(message[0][1].decode('utf-8')))
-        except:
-            print(f"Can't decode message #{int(indices[index])}\n\n")
-
-    return messages
+    def delete_message(self, uid):
+        self.server.store("3203", '+X-GM-LABELS', '\\Trash')
