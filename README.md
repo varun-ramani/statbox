@@ -4,7 +4,7 @@ Statbox provides useful statistics about your inbox. Currently available as set 
 
 ## Getting Started
 Verify that you have Python 3 installed, and `git clone` Statbox onto your computer.
-Inside statbox's folder, create a file named `creds.json` with the following contents:
+Inside Statbox's folder, create a file named `creds.json` with the following contents:
 ```json
 {
     "username": "youremailaddress@gmail.com",
