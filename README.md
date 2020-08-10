@@ -13,4 +13,8 @@ Inside statbox's folder, create a file named `creds.json` with the following con
 ```
 
 ## Running Statbox
+`python3 statbox.py`
 ![Running Statbox](gifs/use.gif)
+
+## The Data
+Data about your inbox can be found under the `counts/` directory.
