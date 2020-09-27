@@ -1,7 +1,9 @@
 # Statbox
+**You watch, aghast, as a torrential downpour of garbage floods your inbox. The last bastions of hope, your email provider's spam filters, have long since been washed away by the deluge of advertising, marketing, and poorly-disguised spam. You regret using your primary email address to make an account on that shady website, and as the number of unread emails crosses 4000, you feel dizzy.** *Statbox can help!*
 
-Statbox is a command-line utility that provides useful statistics about your inbox. In its current form, 
-Statbox is capable of counting emails by the following:
+Statbox counts emails by various metrics and displays the final results, so you can quickly identify the worst spammers, delete their messages, and reclaim your pristine inbox.
+
+In its current form, Statbox is capable of counting emails by the following metrics:
 * **Address**: The full email address. In the email address "the.spammers@sketchy.website.com", this field would be the entire thing.
 * **Domain**: The last two segments of the email address. In the above example, the domain would be "website.com". Other domains include "varunramani.com", "github.com", and "google.com".
 * **Top Level Domain (TLD)**: The last segment of the email address. In the above example, this would be "com". Other TLDs include "org" and "net".
