@@ -1,9 +1,20 @@
 # Statbox
 
-Statbox provides useful statistics about your inbox. Currently available as set of CLI-only Python3 scripts.
+Statbox is a command-line utility that provides useful statistics about your inbox. In its current form, 
+Statbox is capable of counting emails by the following:
+* **Address**: The full email address. In the email address "the.spammers@sketchy.website.com", this field would be the entire thing.
+* **Domain**: The last two segments of the email address. In the above example, the domain would be "website.com". Other domains include "varunramani.com", "github.com", and "google.com".
+* **Top Level Domain (TLD)**: The last segment of the email address. In the above example, this would be "com". Other TLDs include "org" and "net".
+* **HOSTNAME**: Everything following the '@' symbol. In the above example, this would be "sketchy.website.com". Other hostnames include "gmail.com", "mail.google.com", and "yahoo.com".
 
 ## Getting Started
-Verify that you have Python 3 installed, and `git clone` Statbox onto your computer.
+### Dependencies
+You will need the following in order to use Statbox:
+* Python (>3.6)
+### Installation
+If you have Git installed, you can clone Statbox into any folder of your choice. If not, 
+you can download Statbox as a zip archive from GitHub.
+### Configuration
 Inside Statbox's folder, create a file named `creds.json` with the following contents:
 ```json
 {
@@ -12,11 +23,15 @@ Inside Statbox's folder, create a file named `creds.json` with the following con
 }
 ```
 
-## Running Statbox
+### Running Statbox
 `python3 statbox.py`
 ![Running Statbox](gifs/use.gif)
 
-Once Statbox has been run for the first time, it will create a file labeled `messagedump`. This means that emails do not have to be re-downloaded every time, since Statbox will simply read from this file if it is available. If you want to get the latest information about your inbox, simply delete this file and run Statbox again.
+*Note*:
+When Statbox is executed for the first time, a file named `messagedump` will appear in the same directory as the main
+Python script. This file caches downloaded messages so that Statbox does not have to re-download them each time it is 
+run. Consequently, Statbox will refuse to refresh if this file is present. To obtain the latest information about 
+your inbox, delete this file and let Statbox re-create it.
 
 ## The Data
 Data about your inbox can be found under the `counts/` directory once you have run Statbox.
