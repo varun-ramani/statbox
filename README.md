@@ -1,4 +1,5 @@
-# Statbox
+![Banner](branding/banner.png)
+
 **You watch, aghast, as a torrential downpour of garbage floods your inbox. The last bastions of hope, your email provider's spam filters, have long since been washed away by the deluge of advertising, marketing, and poorly-disguised spam. You regret using your primary email address to make an account on that shady website, and as the number of unread emails crosses 4000, you feel dizzy.** *Statbox can help!*
 
 Statbox counts emails by various metrics and displays the final results, so you can quickly identify the worst spammers, delete their messages, and reclaim your pristine inbox.
